@@ -5,6 +5,7 @@ import com.supermarket.checkout.domain.Price;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,10 @@ public class PriceService {
         return priceRepository.findById(id).get();
     }
 
+    public Price getPriceByItem(String item) {
+        return priceRepository.findByItem(item);
+    }
+
     public void saveOrUpdate(Price price) {
         priceRepository.save(price);
     }
@@ -30,4 +35,6 @@ public class PriceService {
     public void delete(int id) {
         priceRepository.deleteById(id);
     }
+
+
 }

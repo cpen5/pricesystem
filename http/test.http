@@ -1,0 +1,11 @@
+GET http://localhost:9555/prices
+Accept: application/json
+
+###
+
+POST http://localhost:9555/prices/total
+Content-Type: application/x-www-form-urlencoded
+
+items=A A A B
+
+###
