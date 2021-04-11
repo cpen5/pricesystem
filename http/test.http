@@ -1,3 +1,13 @@
+POST http://localhost:9555/prices/checkout
+Content-Type: application/x-www-form-urlencoded
+
+itemName=C&&rule=5 for 100
+###
+
+
+
+
+###
 GET http://localhost:9555/prices
 Accept: application/json
 
@@ -6,6 +16,7 @@ Accept: application/json
 POST http://localhost:9555/prices/total
 Content-Type: application/x-www-form-urlencoded
 
-items=A A A B
+items=C C C C C C A A A A
 
 ###
+

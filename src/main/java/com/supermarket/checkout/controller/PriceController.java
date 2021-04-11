@@ -103,21 +103,21 @@ public class PriceController {
         }
 
         // calculate total
-        List<String> calcualted = new LinkedList<>();
+        List<String> calculated = new LinkedList<>();
         for(Item item: itemList) {
-            if(!calcualted.contains(item.getName())) {
-                calcualted.add(item.getName());
+            if(!calculated.contains(item.getName())) {
+                calculated.add(item.getName());
                 int remain = 0;
                 Integer quantity = itemTotal.get(item.getName());
                 if (item.getSpecialQuantity() != 0 && quantity >= item.getSpecialQuantity()) {
                     remain = quantity % item.getSpecialQuantity();
                     int div = (quantity - remain) / item.getSpecialQuantity();
-                    total = new BigDecimal(div).multiply(item.getSpecialPrice());
+                    total = total.add(new BigDecimal(div).multiply(item.getSpecialPrice()));
                 } else {
-                    if (remain > 0) {
-                        total = total.add(new BigDecimal(remain).multiply(item.getUnitPrice()));
-                    }
                     total = total.add(new BigDecimal(quantity).multiply(item.getUnitPrice()));
+                }
+                if (remain > 0) {
+                    total = total.add(new BigDecimal(remain).multiply(item.getUnitPrice()));
                 }
             }
         }
