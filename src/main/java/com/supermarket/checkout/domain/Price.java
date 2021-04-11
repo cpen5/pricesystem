@@ -12,7 +12,9 @@ public class Price {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    private String item;
+    private BigDecimal unitPrice;
+    private String specialPrice;
     public int getId() {
         return id;
     }
@@ -45,7 +47,5 @@ public class Price {
         this.specialPrice = specialPrice;
     }
 
-    private String item;
-    private BigDecimal unitPrice;
-    private String specialPrice;
+
 }
