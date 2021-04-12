@@ -1,5 +1,5 @@
 POST http://localhost:9555/prices/checkout
-Content-Type: application/x-www-form-urlencoded
+
 
 itemName=C&&rule=5 for 100
 ###
@@ -14,9 +14,9 @@ Accept: application/json
 ###
 
 POST http://localhost:9555/prices/total
-Content-Type: application/x-www-form-urlencoded
 
-items=C C C C C C A A A A
+
+C C C C C C A A A A
 
 ###
 

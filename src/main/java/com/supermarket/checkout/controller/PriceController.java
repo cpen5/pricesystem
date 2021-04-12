@@ -5,17 +5,17 @@ import com.supermarket.checkout.domain.Price;
 import com.supermarket.checkout.domain.Rule;
 import com.supermarket.checkout.service.PriceService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class PriceController {
     @Resource
-    com.supermarket.checkout.service.PriceService priceService;
+    PriceService priceService;
 
     @GetMapping("/prices")
     private List<Price> getAllPrices() {
@@ -50,10 +50,11 @@ public class PriceController {
               Price newPrice = new Price();
               BeanUtils.copyProperties(item, newPrice);
               //reset the special price
+              if (rule.getRule().split(" ").length != 3) {
+                  throw new IllegalArgumentException("not a valid rule");
+              }
               newPrice.setSpecialPrice(rule.getRule());
-
               priceService.saveOrUpdate(newPrice);
-
           }
       }
     }
@@ -62,11 +63,12 @@ public class PriceController {
 
     /**
      * each item name separate by a space
+     * assume scan all items then calculate the total
      * @param items
      * @return
      */
     @PostMapping("/prices/total")
-    public BigDecimal total(String items) {
+    public BigDecimal calculatePrice(@RequestBody String items) {
         BigDecimal total = new BigDecimal(0);
 
         String[] itemA;
@@ -75,56 +77,41 @@ public class PriceController {
         } else {
             return total;
         }
-
+        //store individual item
         ArrayList<Item> itemList = new ArrayList<>();
-        Map<String, Integer> itemTotal = new HashMap<>();
-        for (String item: itemA) {
+        //store item and its quantity
+        Map<String, Long> itemTotal = Arrays.stream(itemA)
+                .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
 
-            Price price = priceService.getPriceByItem(item);
 
-            Item item1 = new Item();
-            item1.setName(price.getItem());
-            item1.setUnitPrice(price.getUnitPrice());
-            Map<Integer, BigDecimal> map = new HashMap<>();
-            if (!price.getSpecialPrice().isEmpty()) {
-                String[] special = price.getSpecialPrice().split(" ");
-                if (special.length != 3) {
-                    throw new IllegalArgumentException("not a valid special price");
-                }
-                // map quantity to price
-                map.put(Integer.valueOf(special[0]), new BigDecimal(special[2]));
-                item1.setSpecialQuantity(Integer.valueOf(special[0]));
-                item1.setSpecialPrice(new BigDecimal(special[2]));
-            }
-
-            itemList.add(item1);
-
-            itemTotal.put(item1.getName(), itemTotal.getOrDefault(item1.getName(), 0) + 1);
-        }
-
-        // calculate total
         List<String> calculated = new LinkedList<>();
-        for(Item item: itemList) {
-            if(!calculated.contains(item.getName())) {
-                calculated.add(item.getName());
-                int remain = 0;
-                Integer quantity = itemTotal.get(item.getName());
-                if (item.getSpecialQuantity() != 0 && quantity >= item.getSpecialQuantity()) {
-                    remain = quantity % item.getSpecialQuantity();
-                    int div = (quantity - remain) / item.getSpecialQuantity();
-                    total = total.add(new BigDecimal(div).multiply(item.getSpecialPrice()));
-                } else {
-                    total = total.add(new BigDecimal(quantity).multiply(item.getUnitPrice()));
-                }
-                if (remain > 0) {
-                    total = total.add(new BigDecimal(remain).multiply(item.getUnitPrice()));
-                }
+
+        for(String item: itemTotal.keySet()) {
+            int quantity = itemTotal.get(item).intValue();
+            int remain = 0;
+            Price price = priceService.getPriceByItem(item);
+            BigDecimal specialPrice = new BigDecimal(0);
+            int specialQuantity = 0;
+            if (!price.getSpecialPrice().isEmpty() ) {
+                specialQuantity = Integer.valueOf(price.getSpecialPrice().split(" ")[0]);
+                specialPrice = new BigDecimal(price.getSpecialPrice().split(" ")[2]);
             }
+            //case for specialPrice
+            if (specialPrice.compareTo(BigDecimal.ZERO) > 0 && quantity >=specialQuantity) {
+                remain = quantity % specialQuantity;
+                int div = (quantity - remain) / specialQuantity;
+                total = total.add(new BigDecimal(div).multiply(specialPrice));
+            } else {
+                total = total.add(new BigDecimal(quantity).multiply(price.getUnitPrice()));
+            }
+            //assume remaining item cannot get discount
+            if (remain > 0) {
+                total = total.add(new BigDecimal(remain).multiply(price.getUnitPrice()));
+            }
+
         }
 
         return total;
-
-
 
     }
 }
