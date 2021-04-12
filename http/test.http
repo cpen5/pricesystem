@@ -1,7 +1,18 @@
 POST http://localhost:9555/prices/checkout
+Content-Type: application/json
 
+[{"itemName":"C", "rule": "5 for 100" }, {"itemName":"B", "rule": "5 for 60" }]
 
-itemName=C&&rule=5 for 100
+> {%
+   client.test("test-checkout", function() {
+   client.log("checkout interface");
+   var str1 = JSON.stringify(response.body);
+   client.log(str1);
+   client.assert(response.status === 200, "status is not 200");
+   client.assert(str1 === '{"success":true,"code":null,"message":null,"content":[3,2]}', "not correct");
+
+   });
+%}
 ###
 
 
@@ -15,8 +26,19 @@ Accept: application/json
 
 POST http://localhost:9555/prices/total
 
-
 C C C C C C A A A A
+
+
+> {%
+   client.test("test-total", function() {
+   client.log("total interface");
+   var str1 = JSON.stringify(response.body);
+   client.log(str1);
+   client.assert(response.status === 200, "status is not 200");
+   client.assert(str1 === '{"success":true,"code":null,"message":null,"content":320}', "not correct");
+
+   });
+%}
 
 ###
 
