@@ -9,8 +9,8 @@ Content-Type: application/json
    var str1 = JSON.stringify(response.body);
    client.log(str1);
    client.assert(response.status === 200, "status is not 200");
-   client.assert(str1 === '{"success":true,"code":null,"message":null,"content":[3,2]}', "not correct");
-
+   var obj = JSON.parse(str1)
+   client.assert(obj['content'].toString() === "3,2", "not correct");
    });
 %}
 ###
@@ -35,8 +35,9 @@ C C C C C C A A A A
    var str1 = JSON.stringify(response.body);
    client.log(str1);
    client.assert(response.status === 200, "status is not 200");
-   client.assert(str1 === '{"success":true,"code":null,"message":null,"content":320}', "not correct");
-
+   var obj = JSON.parse(str1)
+   //client.assert(str1 === '{"success":true,"code":null,"message":null,"content":320}', "not correct");
+   client.assert(obj.content === 320, "not correct");
    });
 %}
 

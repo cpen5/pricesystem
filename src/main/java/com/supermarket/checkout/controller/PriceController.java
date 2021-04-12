@@ -3,7 +3,6 @@ package com.supermarket.checkout.controller;
 import com.supermarket.checkout.common.exception.BusinessException;
 import com.supermarket.checkout.common.exception.BusinessExceptionCode;
 import com.supermarket.checkout.common.exception.dto.ResponseDto;
-import com.supermarket.checkout.domain.Item;
 import com.supermarket.checkout.domain.Price;
 import com.supermarket.checkout.domain.Rule;
 import com.supermarket.checkout.service.PriceService;
@@ -95,8 +94,7 @@ public class PriceController {
             responseDto.setContent(total);
             return responseDto;
         }
-        //store individual item
-        ArrayList<Item> itemList = new ArrayList<>();
+
         //store item and its quantity
         Map<String, Long> itemTotal = Arrays.stream(itemA)
                 .collect(Collectors.groupingBy(s -> s, Collectors.counting()));
